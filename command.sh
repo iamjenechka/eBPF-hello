@@ -1,0 +1,1 @@
+strace -c echo "hello"
