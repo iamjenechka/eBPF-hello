@@ -1,6 +1,8 @@
+#!/usr/bin/python
+from bcc import BPF
+import time
 
-
-BPF_HASH(counter_table);
+program = r"""BPF_HASH(counter_table);
 
 int hello(void *ctx) {
     u64 uid;
@@ -16,5 +18,20 @@ int hello(void *ctx) {
     counter_table.update(&uid, &counter);
     return 0;
 }
+"""
+
+# load into a kernel & attach to the execve kprobe
+b = BPF(text=program)
+syscall = b.get_syscall_fnname("execve")
+b.attach_kprobe(event=syscall, fn_name="hello")
+
+while True:
+ time.sleep(2)
+ s = ""
+ for k,v in b["counter_table"].items():
+    s += f"ID {k.value}: {v.value}\t"
+ print(s)
+
+
 
 
