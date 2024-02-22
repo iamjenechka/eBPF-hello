@@ -51,8 +51,14 @@ b.attach_kprobe(event=syscall, fn_name="hello")
 def print_event(cpu, data, size):
    #обратиться к bpfmap собрать мёд для паровозика
    data = b["output"].event(data)
-   print(f"{data.pid} {data.uid} {data.command.decode()} " + \
-   f"{data.message.decode()}")
+
+   if data.pid % 2 == 0:
+      print(f"{data.pid} {data.uid} {data.command.decode()} " + \
+      f"{data.message.decode()}")
+   else:
+      print(f" :) {data.pid} {data.uid} {data.command.decode()} " + \
+      f"{data.message.decode()}")
+
 
 #открыть буфер и когда читаем из него каждый раз, пчёлка радостно жужит
 b["output"].open_perf_buffer(print_event)
